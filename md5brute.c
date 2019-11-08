@@ -11,6 +11,7 @@ char gesucht[64];
 char fertig = 0;
 int anz_threads;
 char diff = MAX - MIN;
+char output = 0;
 
 void check(unsigned char *feld,int i,int beginn, int ende){
 	if(i != 0){
@@ -30,29 +31,27 @@ void *BruteForce(void *threadid){
 	tid = (long) threadid;
 	int ende = MAX;
 	int beginn = MIN;
-	if(tid==0){
-		beginn = 0 + MIN;
-	}
 	unsigned char result[MD5_DIGEST_LENGTH];
 	int x=beginn;
 	for(int i=0;i<8;i++){
-		string[i]=diff % anz_threads + tid * (diff /anz_threads) + MIN;
+		if( tid != 0){
+			string[i] = diff % anz_threads + tid * (diff /anz_threads) + MIN;
+		}else{
+			string[i] = MIN;
+		}
 	}
-	//string[8]='\0';
 	unsigned char z;
 	int test = 0;
 	while(test != 32 && fertig == 0){
 		test = 0;
 		hex[0]='\0';
-		if(x!=ende+1){
+		if( x != ende + 1 ){
 			z = string[7];
 			z++;
 			string[7] = z;
-			//string[8] = '\0';
 		}else{
 			x = beginn;
 			check(string,7,beginn,ende);
-			//string[8]='\0';
 		}
 
 		MD5(string, strlen(string), result);
@@ -60,7 +59,7 @@ void *BruteForce(void *threadid){
 			sprintf(tmp,"%02x",result[i]);
 			strcat(hex,tmp);
 		}
-		if(tid == 0){
+		if(output == 1){
 			printf("%s\t%c%c%c%c%c%c%c%c\t%d\t%d\t%d\n",hex,string[0],string[1],string[2],string[3],string[4],string[5],string[6],string[7],beginn,ende,x);
 		}
 		for(int i = 0; i < 32;i++){
